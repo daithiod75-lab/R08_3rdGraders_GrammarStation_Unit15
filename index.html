@@ -1,0 +1,1589 @@
+<!-- Chosen Palette: Slate Midnight & Indigo Amber -->
+<!-- Application Structure Plan: The SPA is organized into five structured learning tabs designed for progressive grammar mastery:
+     1. Concept: Visual breakdown of Present Perfect (Continuity), timeline diagrams, and core prepositions (for/since/How long).
+     2. Dialogue: Contextual conversational practice between Mark and Emma with integrated Web Speech audio playbacks.
+     3. Practice: Interactive practice activities divided into three sub-modules (Fill-in-the-blanks, Word Tile Unscramble, and Preposition Choice).
+     4. Problem Solving: Dual-mode 25-question assessment featuring a 30-second Timed Speed Quiz mode and a full Printable Worksheet mode.
+     5. Summary: High-level mastery dashboard with score analytics, mistake tracking, and key grammar takeaways.
+     All user inputs auto-save via localStorage and can be exported as clean PDF/Print worksheets. -->
+<!-- Visualization & Content Choices:
+     - Concept Timeline: Constructed using responsive Tailwind flex/grid layout with CSS animated glow nodes (NO SVG) to illustrate past-to-present time continuity.
+     - Audio Feedback: Browser-native Web Speech API for authentic English pronunciation.
+     - Unscramble Cards: Interactive HTML/JS dynamic word tiles for engaging tactile sentence building.
+     - Timed Speed Test: Vanilla JS countdown timer with dynamic width progress bars.
+     - PDF Printable Worksheet: Print CSS media rules removing interactive UI chrome while converting inputs into paper-ready test blanks. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNIT 15 Present Perfect (Continuity) | 総合英語学習プラットフォーム</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    }
+
+    /* Pulse animation for timeline indicator */
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.75; }
+    }
+    .pulse-animation {
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+
+    /* Smooth progress bar timer transition */
+    .timer-bar-fill {
+      transition: width 1s linear;
+    }
+
+    /* PRINT & PDF FORMATTING OVERRIDES */
+    @media print {
+      header, footer, .no-print, .tab-btn, button {
+        display: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+
+      main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .tab-content.hidden {
+        display: none !important;
+      }
+
+      .tab-content.block {
+        display: block !important;
+      }
+
+      /* Clean underline inputs for printed worksheets */
+      input[type="text"] {
+        border: none !important;
+        border-bottom: 2px solid #0f172a !important;
+        background: transparent !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 2px 4px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        display: inline-block !important;
+      }
+
+      /* Card break containment for print */
+      .activity-block, .dialogue-line, #all-25-list-container > div, .bg-white {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      .bg-indigo-600, .bg-sky-600 {
+        background-color: #1e1b4b !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- ================= TOP HEADER NAVIGATION ================= -->
+  <header class="bg-slate-900/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-800 shadow-xl no-print">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Unit Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-amber-400 flex items-center justify-center text-white font-black text-lg shadow-lg">
+          15
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 font-bold text-[10px] rounded-md border border-indigo-500/30">UNIT 15</span>
+            <span class="text-xs text-slate-400 font-semibold">Junior High School English</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white tracking-tight">Present Perfect (Continuity) 〈現在完了形・継続〉</h1>
+        </div>
+      </div>
+
+      <!-- Live Score & Progress Widget -->
+      <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
+        <div class="text-center">
+          <p class="text-[10px] text-slate-300 font-medium uppercase tracking-wider">Score / 得点</p>
+          <p id="total-score" class="text-xl font-extrabold text-amber-300">0 / 0</p>
+        </div>
+        <div class="h-8 w-px bg-white/20"></div>
+        <div class="text-center">
+          <p class="text-[10px] text-slate-300 font-medium uppercase tracking-wider">Mastery / 達成度</p>
+          <p id="mastery-percentage" class="text-xl font-extrabold text-indigo-300">0%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex space-x-1 sm:space-x-3 border-t border-white/10 overflow-x-auto">
+      <button onclick="switchTab('concept')" id="tab-concept" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-1.5 border-b-2 border-indigo-400 text-indigo-300 whitespace-nowrap">
+        <span>🗺️</span> 1. Concept (概念)
+      </button>
+      <button onclick="switchTab('reading')" id="tab-reading" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-1.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap">
+        <span>💬</span> 2. Dialogue (会話文)
+      </button>
+      <button onclick="switchTab('practice')" id="tab-practice" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-1.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap">
+        <span>🏋️</span> 3. Practice (基本問題)
+      </button>
+      <button onclick="switchTab('challenge')" id="tab-challenge" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-1.5 border-b-2 border-transparent text-amber-400 hover:text-amber-200 whitespace-nowrap font-bold">
+        <span>⚡</span> 4. Problem Solving (全25問問題演習)
+      </button>
+      <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-1.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap">
+        <span>🏆</span> 5. Summary (まとめ)
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
+    
+    <!-- ================= SECTION 1: CONCEPT & VISUAL TIMELINE ================= -->
+    <section id="section-concept" class="tab-content block space-y-8">
+      
+      <!-- Core Concept Overview Banner -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full mb-2 border border-indigo-100">
+              <span>✨</span> Core Grammar Concept / 基本概念
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">What is Present Perfect (Continuity)?</h2>
+            <p class="text-slate-600 text-sm mt-1">現在完了形〈継続〉は、過去の「ある時点」から「現在」まで<strong>動作や状態がずっと続いていること</strong>を表します。</p>
+          </div>
+          
+          <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-center gap-3">
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-base shadow-md">
+              have / has
+            </div>
+            <span class="text-2xl font-black text-indigo-400">+</span>
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-base shadow-md">
+              P.P.
+            </div>
+            <span class="text-xs text-indigo-950 font-bold max-w-[120px] leading-snug">Past Participle<br/>(過去分詞)</span>
+          </div>
+        </div>
+
+        <!-- HTML/CSS Visual Lifespan Timeline Diagram -->
+        <div class="bg-slate-950 rounded-2xl p-6 text-white relative overflow-hidden shadow-inner border border-slate-800">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 text-xs font-mono text-slate-400 border-b border-slate-800 pb-3">
+            <span>PAST START (過去の起点)</span>
+            <span class="text-sky-400 font-bold flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span> CONTINUOUS DURATION (継続期間)
+            </span>
+            <span class="text-amber-400 font-bold flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 pulse-animation"></span> NOW (現在も進行中)
+            </span>
+          </div>
+
+          <!-- Pure HTML/CSS Interactive Visual Timeline -->
+          <div class="relative my-8 px-4 sm:px-12 py-6 bg-slate-900/80 rounded-xl border border-slate-800">
+            <div class="relative w-full h-3 bg-slate-700 rounded-full flex items-center">
+              <!-- Continuity Gradient Span -->
+              <div class="absolute left-[15%] right-[10%] h-3 bg-gradient-to-r from-sky-400 via-indigo-500 to-amber-400 rounded-full shadow-lg"></div>
+              
+              <!-- Past Node -->
+              <div class="absolute left-[15%] transform -translate-x-1/2 flex flex-col items-center">
+                <div class="w-6 h-6 rounded-full bg-sky-400 border-4 border-slate-900 shadow-md"></div>
+                <div class="mt-3 text-center">
+                  <span class="text-xs font-bold text-sky-300 block">2021</span>
+                  <span class="text-[10px] text-slate-400 block">Started living in Tokyo</span>
+                </div>
+              </div>
+
+              <!-- Duration Bar Label -->
+              <div class="absolute left-[50%] transform -translate-x-1/2 -top-8 bg-indigo-900/90 text-indigo-200 border border-indigo-500/40 px-3 py-1 rounded-full text-xs font-black shadow-md">
+                for 5 years (5年間)
+              </div>
+
+              <!-- Present Node -->
+              <div class="absolute right-[10%] transform translate-x-1/2 flex flex-col items-center">
+                <div class="w-7 h-7 rounded-full bg-amber-400 border-4 border-slate-900 pulse-animation shadow-lg"></div>
+                <div class="mt-3 text-center">
+                  <span class="text-xs font-black text-amber-300 block">NOW (現在)</span>
+                  <span class="text-[10px] text-slate-300 block">Still living in Tokyo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 text-center bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+            <span class="text-base sm:text-lg font-bold text-indigo-300 font-mono">"I have lived in Tokyo for five years."</span>
+            <p class="text-xs text-slate-300 mt-1">（私は5年間ずっと東京に住んでいます。）</p>
+          </div>
+
+          <div class="mt-4 bg-slate-800/80 rounded-xl p-4 border border-slate-700 flex items-start gap-3">
+            <span class="text-amber-400 text-lg">💡</span>
+            <div class="text-xs sm:text-sm text-slate-300">
+              <span class="font-bold text-white">Compare Present Simple vs Present Perfect Continuity (時制の比較):</span><br/>
+              • <em>"I live in Tokyo."</em> (現在形：現在東京に住んでいる事実のみを表す。いつからかは不問。)<br/>
+              • <em>"I <strong>have lived</strong> in Tokyo for five years."</em> (現在完了形：5年前から<strong>現在までずっと住み続けている</strong>ことを強調。)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Prepositions Concept Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 hover:shadow-lg transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-3 py-1 bg-sky-100 text-sky-800 rounded-lg font-bold text-sm">for + 期間</span>
+            <span class="text-xs text-slate-500 font-semibold">「〜の間」</span>
+          </div>
+          <p class="text-xs text-slate-600 mb-3">Indicates a <strong>length of time</strong> (時間の長さ・期間).</p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 space-y-1">
+            <p>• <strong>for three days</strong> (3日間)</p>
+            <p>• <strong>for two hours</strong> (2時間)</p>
+            <p>• <strong>for a long time</strong> (長い間)</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 hover:shadow-lg transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-lg font-bold text-sm">since + 起点</span>
+            <span class="text-xs text-slate-500 font-semibold">「〜以来・〜から」</span>
+          </div>
+          <p class="text-xs text-slate-600 mb-3">Indicates a <strong>starting point</strong> in the past (過去の起点).</p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 space-y-1">
+            <p>• <strong>since yesterday</strong> (昨日から)</p>
+            <p>• <strong>since 2020</strong> (2020年から)</p>
+            <p>• <strong>since I was a child</strong> (子供の頃から)</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 hover:shadow-lg transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-sm">How long ...?</span>
+            <span class="text-xs text-slate-500 font-semibold">「どのくらいの間〜？」</span>
+          </div>
+          <p class="text-xs text-slate-600 mb-3">Asks about the duration of continuity (継続期間の質問).</p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 space-y-1">
+            <p><strong>How long have you...</strong> known Ken?</p>
+            <span class="text-slate-500 font-sans text-[11px]">どのくらいの間ケンを知っていますか？</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 2: INTERACTIVE DIALOGUE & CONTEXT ================= -->
+    <section id="section-reading" class="tab-content hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">Contextual Dialogue / 対話文</span>
+            <h2 class="text-2xl font-bold text-slate-900 mt-1">Long-time Friends & Hobbies (長年の友達と趣味)</h2>
+            <p class="text-slate-500 text-xs sm:text-sm">Listen to Mark and Emma talking about how long they have known each other and played music.</p>
+          </div>
+
+          <div class="flex items-center gap-2 no-print">
+            <button onclick="playFullDialogue()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition">
+              <span>▶</span> Listen All / 全体再生
+            </button>
+            <button onclick="stopAudio()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition">
+              <span>⏹</span> Stop
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="dialogue-line p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-indigo-50/50 transition cursor-pointer" onclick="speakText('Emma, how long have you lived in this town?')">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Mark</div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-900">
+                    "Emma, <span class="bg-amber-200 px-1 rounded text-amber-900 font-bold">how long have</span> you <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">lived</span> in this town?"
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">エマ、この町にはどのくらいの間住んでいますか？</p>
+                </div>
+              </div>
+              <span class="text-slate-400 text-sm no-print">🔊</span>
+            </div>
+          </div>
+
+          <div class="dialogue-line p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-indigo-50/50 transition cursor-pointer" onclick="speakText('I have lived here for seven years, since I was ten years old.')">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs">Emma</div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-900">
+                    "I <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">have lived</span> here <span class="bg-sky-200 px-1 rounded text-sky-900 font-bold">for seven years</span>, <span class="bg-amber-200 px-1 rounded text-amber-900 font-bold">since</span> I was ten years old."
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">10歳の頃から、7年間ずっとここに住んでいます。</p>
+                </div>
+              </div>
+              <span class="text-slate-400 text-sm no-print">🔊</span>
+            </div>
+          </div>
+
+          <div class="dialogue-line p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-indigo-50/50 transition cursor-pointer" onclick="speakText('That is a long time! Have you been in the guitar club for a long time too?')">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Mark</div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-900">
+                    "That's a long time! <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">Have</span> you <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">been</span> in the guitar club <span class="bg-sky-200 px-1 rounded text-sky-900 font-bold">for a long time</span> too?"
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">長いですね！ギター部にも長い間入っているのですか？</p>
+                </div>
+              </div>
+              <span class="text-slate-400 text-sm no-print">🔊</span>
+            </div>
+          </div>
+
+          <div class="dialogue-line p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-indigo-50/50 transition cursor-pointer" onclick="speakText('Yes, I have played the guitar since last year. I have known Lisa since middle school.')">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs">Emma</div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-900">
+                    "Yes, I <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">have played</span> the guitar <span class="bg-amber-200 px-1 rounded text-amber-900 font-bold">since last year</span>. I <span class="bg-indigo-200 px-1 rounded text-indigo-900 font-bold">have known</span> Lisa <span class="bg-amber-200 px-1 rounded text-amber-900 font-bold">since</span> middle school."
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">はい、去年からずっとギターを弾いています。リサのことは中学時代からずっと知っています。</p>
+                </div>
+              </div>
+              <span class="text-slate-400 text-sm no-print">🔊</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 3: INTERACTIVE PRACTICE ACTIVITIES ================= -->
+    <section id="section-practice" class="tab-content hidden space-y-8">
+      
+      <!-- Section Action Header: PDF Export & Reset -->
+      <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">Section 3: Continuity Practice Modules</span>
+          <h2 class="text-lg font-bold text-slate-900 mt-0.5">Practice Activities (基本問題演習)</h2>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+          <button onclick="saveAsPDF()" class="px-4 py-2 bg-indigo-900 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5 border border-indigo-700">
+            <span>🖨️</span> PDF保存・印刷
+          </button>
+          <button onclick="resetSection3()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 transition flex items-center gap-1">
+            <span>🔄</span> Section 3 リセット
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-activity module switcher -->
+      <div class="flex flex-wrap gap-2 bg-slate-200/80 p-1.5 rounded-2xl max-w-md mx-auto no-print">
+        <button onclick="switchActivity('act1')" id="act-tab-act1" class="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-indigo-950 shadow-sm transition">
+          Act 1: Fill-in-the-blank
+        </button>
+        <button onclick="switchActivity('act2')" id="act-tab-act2" class="flex-1 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition">
+          Act 2: Sentence Unscramble
+        </button>
+        <button onclick="switchActivity('act3')" id="act-tab-act3" class="flex-1 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition">
+          Act 3: Preposition Choice
+        </button>
+      </div>
+
+      <!-- ACTIVITY 1: Fill-in-the-blank Conjugation -->
+      <div id="activity-act1" class="activity-block space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
+          <div>
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">Activity 1</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1">Continuity Forms & Conjugation</h3>
+            <p class="text-xs text-slate-500">Complete each sentence using (have/has + P.P.).<br/>(動詞を(have/has + 過去分詞)の形にし、適切な継続の英文を完成させなさい。)</p>
+          </div>
+
+          <div class="space-y-6" id="act1-container">
+            <!-- Questions dynamically generated -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span id="act1-status-text" class="text-xs font-semibold text-slate-500">Progress: 0 / 10 questions answered</span>
+            <button id="btn-check-act1" onclick="gradeAct1()" disabled class="px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300">
+              <span>✓</span> Check Answers (答え合わせ)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY 2: Japanese to English Sentence Unscramble -->
+      <div id="activity-act2" class="activity-block hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
+          <div>
+            <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">Activity 2</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1">Sentence Unscramble (語順並べ替え)</h3>
+            <p class="text-xs text-slate-500">Click the word tiles below in the correct order to translate the Japanese sentence.<br/>(日本文の意味を表すように、単語カードを順番にクリックしてください。)</p>
+          </div>
+
+          <div class="space-y-8" id="act2-container">
+            <!-- Unscramble items injected here -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span id="act2-status-text" class="text-xs font-semibold text-slate-500">Progress: 0 / 8 completed</span>
+            <button id="btn-check-act2" onclick="gradeAct2()" disabled class="px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300">
+              <span>✓</span> Check Answers (答え合わせ)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY 3: Question Formation & Preposition Selection -->
+      <div id="activity-act3" class="activity-block hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
+          <div>
+            <span class="px-3 py-1 bg-sky-100 text-sky-800 text-xs font-bold rounded-full">Activity 3</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1">"How long ...?" Questions & For / Since Usage</h3>
+            <p class="text-xs text-slate-500">Complete the questions or supply correct prepositions (for / since).<br/>(「どのくらいの間〜」「〜の間／〜から」を表す語句を補いなさい。)</p>
+          </div>
+
+          <div class="space-y-6" id="act3-container">
+            <!-- Questions injected here -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span id="act3-status-text" class="text-xs font-semibold text-slate-500">Progress: 0 / 7 questions answered</span>
+            <button id="btn-check-act3" onclick="gradeAct3()" disabled class="px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300">
+              <span>✓</span> Check Answers (答え合わせ)
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= SECTION 4: PROBLEM SOLVING TIME (25 PROBLEMS) ================= -->
+    <section id="section-challenge" class="tab-content hidden space-y-6">
+      
+      <!-- Section 4 Mode Header -->
+      <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 text-xs font-extrabold rounded-full mb-1">
+            <span>⚡</span> Section 4: Problem Solving / 全25問問題演習
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">Unit 15 Complete Problem Solving</h2>
+          <p class="text-xs text-slate-500 mt-1">Practice all 25 Unit 15 problems in a timed speed test or review them on a worksheet.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto no-print">
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+            <button onclick="switchSection4Mode('quiz')" id="s4-mode-btn-quiz" class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow-md">
+              <span>⏱️</span> Speed Test
+            </button>
+            <button onclick="switchSection4Mode('list')" id="s4-mode-btn-list" class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+              <span>📝</span> All 25 Worksheet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 1: SPEED QUIZ TEST CHALLENGE -->
+      <div id="sec4-quiz-mode" class="space-y-6">
+        
+        <div id="challenge-start-card" class="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200 text-center space-y-6">
+          <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner text-3xl">
+            ⚡
+          </div>
+
+          <div>
+            <span class="px-3.5 py-1.5 bg-amber-100 text-amber-900 text-xs font-extrabold rounded-full">Unit 15 Speed Test</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-3">25 Problems Speed Challenge!</h2>
+            <p class="text-slate-600 text-xs sm:text-sm mt-2 max-w-xl mx-auto">
+              Test your Unit 15 Present Perfect (Continuity) grammar mastery under timed conditions!<br/>
+              (Unit 15の全25問に挑戦しよう！各問題30秒の制限時間があります。)
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto text-left">
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+              <div class="p-2.5 bg-amber-100 text-amber-800 rounded-xl font-bold text-xs shrink-0">30s</div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">30 Sec / Question</p>
+                <p class="text-[11px] text-slate-500">各問題の制限時間は30秒</p>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+              <div class="p-2.5 bg-indigo-100 text-indigo-800 rounded-xl font-bold text-xs shrink-0">2 pt</div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">2 Points / Question</p>
+                <p class="text-[11px] text-slate-500">1問あたり2点（全25問＝50点）</p>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+              <div class="p-2.5 bg-sky-100 text-sky-800 rounded-xl font-bold text-xs shrink-0">
+                🔊
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">Audio & Feedback</p>
+                <p class="text-[11px] text-slate-500">音声読み上げ ＆ 全問解説付き</p>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="startChallengeTest()" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm sm:text-base rounded-2xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-0.5">
+            ▶ Start Challenge Now / テストを開始する
+          </button>
+        </div>
+
+        <!-- Active Speed Quiz Card -->
+        <div id="challenge-quiz-card" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative overflow-hidden">
+          
+          <div class="space-y-3">
+            <div class="flex justify-between items-center text-xs sm:text-sm font-bold">
+              <span class="flex items-center gap-2 text-indigo-900">
+                <span class="w-3 h-3 rounded-full bg-indigo-600 animate-pulse"></span>
+                <span id="quiz-question-number">Question 1 of 25</span>
+              </span>
+              <span id="quiz-timer-text" class="font-mono text-amber-600 font-extrabold text-base flex items-center gap-1">
+                ⏱️ 30s
+              </span>
+            </div>
+
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+              <div id="quiz-timer-bar" class="timer-bar-fill h-full bg-amber-500 w-full rounded-full"></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span id="quiz-category-tag" class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 text-[11px] font-bold rounded-md">Grammar Category</span>
+              <button id="quiz-audio-btn" onclick="speakCurrentChallengeSentence()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-lg border border-indigo-200 transition flex items-center gap-1">
+                🔊 Listen Sentence
+              </button>
+            </div>
+            <h3 id="quiz-english-prompt" class="text-base sm:text-lg font-bold text-slate-900">Prompt sentence here...</h3>
+            <p id="quiz-japanese-prompt" class="text-xs sm:text-sm text-indigo-700 font-medium">日本語訳がここに入ります。</p>
+          </div>
+
+          <div id="quiz-input-container" class="min-h-[120px] flex flex-col justify-center">
+            <!-- Populated dynamically -->
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+            <button onclick="skipQuestion()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold flex items-center gap-1">
+              Skip / スキップ ➔
+            </button>
+
+            <button onclick="submitChallengeAnswer()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2">
+              Submit Answer / 次へ解答 ✓
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Test Results Card -->
+        <div id="challenge-result-card" class="hidden bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200 text-center space-y-6">
+          
+          <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner text-3xl">
+            🏆
+          </div>
+
+          <div>
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">Challenge Completed! / テスト終了</span>
+            <h2 class="text-3xl font-black text-slate-900 mt-2">Your Test Results (結果発表)</h2>
+            <p class="text-slate-500 text-xs sm:text-sm mt-1">Great job completing all 25 problems in the Unit 15 Challenge!</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-6 shadow-xl max-w-md mx-auto space-y-4">
+            <p class="text-xs text-indigo-300 font-bold uppercase tracking-wider">Total Score Achieved</p>
+            <div class="flex justify-center items-baseline gap-1">
+              <span id="res-score-points" class="text-5xl font-black text-amber-300">0</span>
+              <span class="text-xl font-bold text-slate-400">/ 50 pts</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-xs">
+              <div class="bg-white/10 p-3 rounded-2xl">
+                <p class="text-slate-400">Correct Answers</p>
+                <p id="res-correct-count" class="text-lg font-bold text-indigo-400">0 / 25</p>
+              </div>
+              <div class="bg-white/10 p-3 rounded-2xl">
+                <p class="text-slate-400">Accuracy Rate</p>
+                <p id="res-accuracy-pct" class="text-lg font-bold text-amber-300">0%</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-left max-w-2xl mx-auto space-y-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span>📋</span> Detailed Problem Review (全25問の解説と解答結果):
+            </h3>
+            <div id="res-review-list" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+              <!-- Review items injected via JS -->
+            </div>
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-4 pt-4 border-t border-slate-100">
+            <button onclick="startChallengeTest()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center gap-2">
+              <span>🔄</span> Repeat Test / もう一度挑戦する
+            </button>
+            <button onclick="switchTab('summary')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center gap-2">
+              View Summary / まとめ画面へ進む ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODE 2: FULL 25 PROBLEMS WORKSHEET LIST MODE -->
+      <div id="sec4-list-mode" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
+        
+        <!-- INTEGRATED STUDENT INFORMATION & PDF EXPORT HEADER -->
+        <div class="bg-slate-50 rounded-2xl p-4 shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+            <span class="text-indigo-600 text-base">👤</span>
+            <span>Student Information / 学習者情報</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 text-xs w-full sm:w-auto">
+            <div class="flex items-center gap-1.5 flex-1 sm:flex-none">
+              <label class="font-semibold text-slate-600 whitespace-nowrap">Class/ID:</label>
+              <input type="text" id="student-class" oninput="saveInput()" placeholder="" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 w-28 sm:w-32" />
+            </div>
+            <div class="flex items-center gap-1.5 flex-1 sm:flex-none">
+              <label class="font-semibold text-slate-600 whitespace-nowrap">Name:</label>
+              <input type="text" id="student-name" oninput="saveInput()" placeholder="" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 w-32 sm:w-40" />
+            </div>
+            <div class="flex items-center gap-1.5 flex-1 sm:flex-none">
+              <label class="font-semibold text-slate-600 whitespace-nowrap">Date:</label>
+              <input type="text" id="student-date" oninput="saveInput()" placeholder="" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 w-28 sm:w-32" />
+            </div>
+            <!-- RELOCATED PDF EXPORT BUTTON -->
+            <button onclick="saveAsPDF()" class="px-4 py-2 bg-indigo-900 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5 border border-indigo-700 ml-auto no-print">
+              <span>🖨️</span> PDF保存・印刷
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="px-3 py-1 bg-sky-100 text-sky-800 text-xs font-bold rounded-full">Unit 15 Full Practice Worksheet</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1">All 25 Grammar Problems (全25問一覧演習)</h3>
+            <p class="text-xs text-slate-500">Solve each question at your own pace, check explanations, and listen to pronunciation.</p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="sec4-progress-status" class="text-xs font-bold text-slate-600 mr-2">Progress: 0 / 25 answered</span>
+            <button id="btn-check-sec4" onclick="checkAllListModeAnswers()" disabled class="px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300">
+              <span>✓</span> Grade Worksheet (一括採点)
+            </button>
+            <button onclick="resetSection4()" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1">
+              <span>🔄</span> Reset & Try Again (リセット)
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable / Interactive Worksheet List Container -->
+        <div id="all-25-list-container" class="space-y-4">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+          <span id="sec4-bottom-status" class="text-xs font-bold text-slate-600">Progress: 0 / 25 answered</span>
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="btn-check-sec4-bottom" onclick="checkAllListModeAnswers()" disabled class="px-8 py-3 rounded-xl font-bold text-sm transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300">
+              <span>✓</span> Complete & Grade Worksheet (全25問一括採点)
+            </button>
+            <button onclick="resetSection4()" class="px-5 py-3 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1.5">
+              <span>🔄</span> Reset & Try Again (リセット)
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= SECTION 5: SUMMARY & MASTERY DASHBOARD ================= -->
+    <section id="section-summary" class="tab-content hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 text-center">
+        
+        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          🎯
+        </div>
+
+        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">5. Summary / まとめ</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Unit 15 Mastery Status & Key Takeaways</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Here is your overall performance breakdown across all Unit 15 practice modules.</p>
+
+        <!-- Stats Overview Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto my-8">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <p class="text-[10px] text-slate-400 font-bold uppercase">Total Attempted (解答数)</p>
+            <p id="summary-total" class="text-2xl font-black text-slate-800">0</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+            <p class="text-[10px] text-indigo-600 font-bold uppercase">Correct (正解数)</p>
+            <p id="summary-correct" class="text-2xl font-black text-indigo-600">0</p>
+          </div>
+          <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200">
+            <p class="text-[10px] text-rose-600 font-bold uppercase">Incorrect (不正解数)</p>
+            <p id="summary-incorrect" class="text-2xl font-black text-rose-600">0</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+            <p class="text-[10px] text-indigo-600 font-bold uppercase">Accuracy (正答率)</p>
+            <p id="summary-accuracy" class="text-2xl font-black text-indigo-600">0%</p>
+          </div>
+        </div>
+
+        <!-- Key Grammar Summary Bullet Points -->
+        <div class="text-left max-w-2xl mx-auto space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span>📌</span> Key Unit Takeaways (ユニット15の重要ポイント):
+          </h3>
+          <ul class="text-xs text-slate-600 space-y-2.5 list-disc pl-5 leading-relaxed">
+            <li><strong>継続 (Continuity):</strong> <code class="bg-indigo-100 text-indigo-900 px-1 rounded">have/has + 過去分詞</code> で「（過去から今までずっと）〜している、〜である」状態の継続を表します。</li>
+            <li><strong>for + 期間:</strong> <code class="bg-sky-100 text-sky-900 px-1 rounded">for three years</code> (3年間), <code class="bg-sky-100 text-sky-900 px-1 rounded">for two hours</code> (2時間) のように「時間の長さ・期間」を表します。</li>
+            <li><strong>since + 過去の起点:</strong> <code class="bg-amber-100 text-amber-900 px-1 rounded">since 2018</code> (2018年から), <code class="bg-amber-100 text-amber-900 px-1 rounded">since yesterday</code> (昨日から) のように「過去の始まりの時点」を表します。</li>
+            <li><strong>How long...?:</strong> <code class="bg-slate-200 text-slate-900 px-1 rounded">How long have you lived here?</code> で「どのくらいの間〜していますか」と継続期間を質問します。</li>
+            <li><strong>状態を表す動詞:</strong> <code class="bg-slate-200 text-slate-900 px-1 rounded">know</code>, <code class="bg-slate-200 text-slate-900 px-1 rounded">live</code>, <code class="bg-slate-200 text-slate-900 px-1 rounded">be</code>, <code class="bg-slate-200 text-slate-900 px-1 rounded">have</code>, <code class="bg-slate-200 text-slate-900 px-1 rounded">want</code> などの状態動詞が継続用法で頻出します。</li>
+          </ul>
+        </div>
+
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <button onclick="switchTab('practice')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg transition">
+            Back to Practice / 練習問題へ戻る
+          </button>
+          <button onclick="switchTab('challenge')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+            <span>⚡</span> Problem Solving / 制限時間テストへ
+          </button>
+          <button onclick="resetAllProgress()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
+            Reset All Progress / 全体リセット
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-800 text-slate-500 py-6 text-center text-xs mt-12 no-print">
+    <p>UNIT 15 Present Perfect Continuity | Junior High School English Interactive Learning Platform</p>
+    <p class="mt-1 text-slate-400">Built with HTML5, Tailwind CSS & Web Speech API.</p>
+  </footer>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // --- DATA SETS ---
+
+    // Section 3: Act 1 (10 Fill-in items)
+    const act1Data = [
+      { id: 1, prompt: "I (live) in Kyoto for five years.", jp: "私は京都に5年間住んでいます。", answer: "have lived", accepted: ["have lived"] },
+      { id: 2, prompt: "She (study) English since morning.", jp: "彼女は朝からずっと英語を勉強しています。", answer: "has studied", accepted: ["has studied", "has been studying"] },
+      { id: 3, prompt: "They (know) him for a long time.", jp: "彼らは長い間彼のことを知っています。", answer: "have known", accepted: ["have known"] },
+      { id: 4, prompt: "He (be) busy since last week.", jp: "彼は先週からずっと忙しいです。", answer: "has been", accepted: ["has been"] },
+      { id: 5, prompt: "We (play) soccer for two hours.", jp: "私たちは2時間サッカーをしています。", answer: "have played", accepted: ["have played", "have been playing"] },
+      { id: 6, prompt: "Ken (work) at this store since 2020.", jp: "ケンは2020年からこの店で働いています。", answer: "has worked", accepted: ["has worked", "has been working"] },
+      { id: 7, prompt: "You (have) this dog for three years.", jp: "あなたはこの犬を3年間飼っています。", answer: "have had", accepted: ["have had"] },
+      { id: 8, prompt: "My mother (cook) dinner since five o'clock.", jp: "母は5時からずっと夕食を作っています。", answer: "has cooked", accepted: ["has cooked", "has been cooking"] },
+      { id: 9, prompt: "I (want) to visit Paris for a long time.", jp: "私はずっと長い間パリを訪れたいと思っています。", answer: "have wanted", accepted: ["have wanted"] },
+      { id: 10, prompt: "The children (sleep) for ten hours.", jp: "子供たちは10時間ずっと寝ています。", answer: "have slept", accepted: ["have slept", "have been sleeping"] }
+    ];
+
+    // Section 3: Act 2 (8 Unscramble items)
+    const act2Data = [
+      { id: 1, jp: "私は5年間英語を勉強しています。", words: ["studied", "for", "English", "I", "years", "have", "five"], answer: "I have studied English for five years" },
+      { id: 2, jp: "エマは昨日からずっと忙しいです。", words: ["has", "since", "Emma", "busy", "yesterday", "been"], answer: "Emma has been busy since yesterday" },
+      { id: 3, jp: "あなたはこの町にどのくらい住んでいますか？", words: ["you", "lived", "long", "have", "How", "in this town?"], answer: "How long have you lived in this town?" },
+      { id: 4, jp: "私たちは子供の頃からお互いを知っています。", words: ["since", "We", "each other", "we were children", "have known"], answer: "We have known each other since we were children" },
+      { id: 5, jp: "彼は2時間ずっとピアノを弾いています。", words: ["played", "He", "for", "hours", "has", "two", "the piano"], answer: "He has played the piano for two hours" },
+      { id: 6, jp: "メアリーは3日間ずっと病気です。", words: ["sick", "for", "has", "Mary", "three", "been", "days"], answer: "Mary has been sick for three days" },
+      { id: 7, jp: "あなたは何年間日本語を勉強していますか？", words: ["Japanese", "have", "How", "studied", "you", "long"], answer: "How long have you studied Japanese?" },
+      { id: 8, jp: "私の父は朝からずっとテレビを見ています。", words: ["since", "My father", "watched", "has", "morning", "television"], answer: "My father has watched television since morning" }
+    ];
+
+    // Section 3: Act 3 (7 Preposition & Question Practice)
+    const act3Data = [
+      { id: 1, prompt: "I have lived here ___ three years. (for / since)", answer: "for", jp: "私はここに3年間住んでいます。" },
+      { id: 2, prompt: "She has been here ___ 2019. (for / since)", answer: "since", jp: "彼女は2019年からここにいます。" },
+      { id: 3, prompt: "___ long have you known him?", answer: "How", jp: "どのくらいの間彼を知っていますか？" },
+      { id: 4, prompt: "They have played tennis ___ two hours.", answer: "for", jp: "彼らは2時間テニスをしています。" },
+      { id: 5, prompt: "He has worked here ___ last Monday.", answer: "since", jp: "彼は先週の月曜日からここで働いています。" },
+      { id: 6, prompt: "___ long has it rained?", answer: "How", jp: "どのくらいの間雨が降っていますか？" },
+      { id: 7, prompt: "We have waited for the bus ___ an hour.", answer: "for", jp: "私たちは1時間バスを待っています。" }
+    ];
+
+    // Section 4: All 25 Problems Dataset
+    const all25Problems = [
+      // Fill-in & Conjugation (1-10)
+      { id: 1, cat: "Conjugation", prompt: "I (live) in Osaka for ten years.", jp: "私は大阪に10年間住んでいます。", answer: "have lived", accepted: ["have lived"], hint: "I に続く現在完了〈継続〉の形" },
+      { id: 2, cat: "Conjugation", prompt: "She (study) math since morning.", jp: "彼女は朝からずっと数学を勉強しています。", answer: "has studied", accepted: ["has studied", "has been studying"], hint: "主語が She なので has + 過去分詞" },
+      { id: 3, cat: "Conjugation", prompt: "They (know) each other for five years.", jp: "彼らは5年間お互いを知っています。", answer: "have known", accepted: ["have known"], hint: "know は状態を表す動詞" },
+      { id: 4, cat: "Conjugation", prompt: "He (be) ill since last Sunday.", jp: "彼は前の日曜日からずっと病気です。", answer: "has been", accepted: ["has been"], hint: "be動詞の過去分詞は been" },
+      { id: 5, cat: "Conjugation", prompt: "We (play) baseball for two hours.", jp: "私たちは2時間野球をしています。", answer: "have played", accepted: ["have played", "have been playing"], hint: "We に続く have + 過去分詞" },
+      { id: 6, cat: "Conjugation", prompt: "Ken (work) in Tokyo since 2018.", jp: "ケンは2018年から東京で働いています。", answer: "has worked", accepted: ["has worked", "has been working"], hint: "Ken (3人称単数) + has" },
+      { id: 7, cat: "Conjugation", prompt: "You (have) this car for three years.", jp: "あなたはこの車を3年間所有しています。", answer: "have had", accepted: ["have had"], hint: "have の過去分詞は had" },
+      { id: 8, cat: "Conjugation", prompt: "My sister (clean) her room for an hour.", jp: "私の姉は1時間ずっと部屋を掃除しています。", answer: "has cleaned", accepted: ["has cleaned", "has been cleaning"], hint: "My sister (3人称単数) + has" },
+      { id: 9, cat: "Conjugation", prompt: "I (want) to be a doctor for a long time.", jp: "私はずっと長い間医者になりたいと思っています。", answer: "have wanted", accepted: ["have wanted"], hint: "want は状態動詞" },
+      { id: 10, cat: "Conjugation", prompt: "The baby (sleep) for three hours.", jp: "赤ん坊が3時間ずっと寝ています。", answer: "has slept", accepted: ["has slept", "has been sleeping"], hint: "The baby (3人称単数) + has" },
+
+      // Prepositions For / Since (11-17)
+      { id: 11, cat: "Prepositions", prompt: "I have lived here ___ ten years. (for / since)", jp: "私はここに10年間住んでいます。", answer: "for", accepted: ["for"], hint: "ten years は期間の長さなので for" },
+      { id: 12, cat: "Prepositions", prompt: "She has been busy ___ yesterday. (for / since)", jp: "彼女は昨日からずっと忙しいです。", answer: "since", accepted: ["since"], hint: "yesterday は起点の時なので since" },
+      { id: 13, cat: "Prepositions", prompt: "They have played soccer ___ two hours. (for / since)", jp: "彼らは2時間サッカーをしています。", answer: "for", accepted: ["for"], hint: "two hours は時間の長さ" },
+      { id: 14, cat: "Prepositions", prompt: "We have known him ___ we were children. (for / since)", jp: "私たちは子供の頃から彼を知っています。", answer: "since", accepted: ["since"], hint: "we were children は過去の起点となる節" },
+      { id: 15, cat: "Prepositions", prompt: "He has studied English ___ three hours. (for / since)", jp: "彼は3時間英語を勉強しています。", answer: "for", accepted: ["for"], hint: "three hours は期間" },
+      { id: 16, cat: "Prepositions", prompt: "My father has worked here ___ 2015. (for / since)", jp: "父は2015年からここで働いています。", answer: "since", accepted: ["since"], hint: "2015年は起点の年" },
+      { id: 17, cat: "Prepositions", prompt: "The rain has fallen ___ this morning. (for / since)", jp: "今朝からずっと雨が降っています。", answer: "since", accepted: ["since"], hint: "this morning は起点の時" },
+
+      // Question Formation with How long (18-21)
+      { id: 18, cat: "Questions", prompt: "___ long have you lived in Kyoto?", jp: "どのくらいの間京都に住んでいますか？", answer: "How", accepted: ["How", "how"], hint: "「どのくらいの間」を尋ねる疑問詞" },
+      { id: 19, cat: "Questions", prompt: "___ long has she studied English?", jp: "彼女はどのくらいの間英語を勉強していますか？", answer: "How", accepted: ["How", "how"], hint: "How long ..." },
+      { id: 20, cat: "Questions", prompt: "A: How long have you known him?\nB: I have known him ___ three years.", jp: "A: どのくらい彼を知っていますか？\nB: 3年間知っています。", answer: "for", accepted: ["for"], hint: "3年間の期間を表す前置詞" },
+      { id: 21, cat: "Questions", prompt: "A: How long has Ken lived here?\nB: He has lived here ___ last year.", jp: "A: ケンはどのくらいここに住んでいますか？\nB: 去年からここに住んでいます。", answer: "since", accepted: ["since"], hint: "昨年の起点を表す前置詞" },
+
+      // Sentence Unscramble & Writing (22-25)
+      { id: 22, cat: "Writing", prompt: "日本語を英語に: 「私は3年間英語を勉強しています。」", jp: "I have studied English for three years.", answer: "I have studied English for three years", accepted: ["I have studied English for three years", "I have been studying English for three years"], hint: "I have studied English for three years" },
+      { id: 23, cat: "Writing", prompt: "日本語を英語に: 「エマは昨日からずっと忙しいです。」", jp: "Emma has been busy since yesterday.", answer: "Emma has been busy since yesterday", accepted: ["Emma has been busy since yesterday"], hint: "Emma has been busy since yesterday" },
+      { id: 24, cat: "Writing", prompt: "日本語を英語に: 「あなたはこの町にどのくらい住んでいますか？」", jp: "How long have you lived in this town?", answer: "How long have you lived in this town?", accepted: ["How long have you lived in this town", "How long have you lived in this town?"], hint: "How long have you lived in this town?" },
+      { id: 25, cat: "Writing", prompt: "日本語を英語に: 「私たちは子供の頃からお互いを知っています。」", jp: "We have known each other since we were children.", answer: "We have known each other since we were children.", accepted: ["We have known each other since we were children", "We have known each other since we were children."], hint: "We have known each other since we were children." }
+    ];
+
+    // Challenge state variables
+    let currentChallengeIndex = 0;
+    let challengeTimer = null;
+    let challengeTimeRemaining = 30;
+    let challengeResults = [];
+    let sec4Mode = 'quiz';
+
+    // --- INITIALIZATION & LOCALSTORAGE ---
+
+    window.onload = function() {
+      // Load saved student inputs
+      loadSavedData();
+      
+      // Render Section 3 Activities
+      renderAct1();
+      renderAct2();
+      renderAct3();
+
+      // Render Section 4 Worksheet List
+      renderSection4List();
+
+      // Update global score
+      updateGlobalScore();
+    };
+
+    function saveInput() {
+      const data = {
+        studentClass: document.getElementById('student-class')?.value || '',
+        studentName: document.getElementById('student-name')?.value || '',
+        studentDate: document.getElementById('student-date')?.value || '',
+        act1Inputs: {},
+        act3Inputs: {},
+        sec4Inputs: {}
+      };
+
+      act1Data.forEach(item => {
+        const el = document.getElementById(`act1-input-${item.id}`);
+        if (el) data.act1Inputs[item.id] = el.value;
+      });
+
+      act3Data.forEach(item => {
+        const el = document.getElementById(`act3-input-${item.id}`);
+        if (el) data.act3Inputs[item.id] = el.value;
+      });
+
+      all25Problems.forEach(item => {
+        const el = document.getElementById(`sec4-input-${item.id}`);
+        if (el) data.sec4Inputs[item.id] = el.value;
+      });
+
+      localStorage.setItem('unit15_grammar_data', JSON.stringify(data));
+      updateGlobalScore();
+    }
+
+    function loadSavedData() {
+      const saved = localStorage.getItem('unit15_grammar_data');
+      if (!saved) return;
+      try {
+        const data = JSON.parse(saved);
+        if (document.getElementById('student-class')) document.getElementById('student-class').value = data.studentClass || '';
+        if (document.getElementById('student-name')) document.getElementById('student-name').value = data.studentName || '';
+        if (document.getElementById('student-date')) document.getElementById('student-date').value = data.studentDate || '';
+
+        if (data.act1Inputs) {
+          Object.keys(data.act1Inputs).forEach(id => {
+            const el = document.getElementById(`act1-input-${id}`);
+            if (el) el.value = data.act1Inputs[id];
+          });
+        }
+
+        if (data.act3Inputs) {
+          Object.keys(data.act3Inputs).forEach(id => {
+            const el = document.getElementById(`act3-input-${id}`);
+            if (el) el.value = data.act3Inputs[id];
+          });
+        }
+
+        if (data.sec4Inputs) {
+          Object.keys(data.sec4Inputs).forEach(id => {
+            const el = document.getElementById(`sec4-input-${id}`);
+            if (el) el.value = data.sec4Inputs[id];
+          });
+        }
+      } catch (e) {
+        console.error("Error loading saved data", e);
+      }
+    }
+
+    // --- TAB & SUB-ACTIVITY NAVIGATION ---
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('block'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-400', 'text-indigo-300', 'border-amber-400', 'text-amber-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      const targetTab = document.getElementById(`section-${tabId}`);
+      if (targetTab) {
+        targetTab.classList.remove('hidden');
+        targetTab.classList.add('block');
+      }
+
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+        if (tabId === 'challenge') {
+          activeBtn.classList.add('border-amber-400', 'text-amber-400');
+        } else {
+          activeBtn.classList.add('border-indigo-400', 'text-indigo-300');
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchActivity(actId) {
+      ['act1', 'act2', 'act3'].forEach(id => {
+        const block = document.getElementById(`activity-${id}`);
+        const tab = document.getElementById(`act-tab-${id}`);
+        if (block) block.classList.add('hidden');
+        if (tab) {
+          tab.classList.remove('bg-white', 'text-indigo-950', 'shadow-sm');
+          tab.classList.add('text-slate-600');
+        }
+      });
+
+      const targetBlock = document.getElementById(`activity-${actId}`);
+      const targetTab = document.getElementById(`act-tab-${actId}`);
+      if (targetBlock) targetBlock.classList.remove('hidden');
+      if (targetTab) {
+        targetTab.classList.remove('text-slate-600');
+        targetTab.classList.add('bg-white', 'text-indigo-950', 'shadow-sm', 'font-bold');
+      }
+    }
+
+    function switchSection4Mode(mode) {
+      sec4Mode = mode;
+      const quizModeDiv = document.getElementById('sec4-quiz-mode');
+      const listModeDiv = document.getElementById('sec4-list-mode');
+      const btnQuiz = document.getElementById('s4-mode-btn-quiz');
+      const btnList = document.getElementById('s4-mode-btn-list');
+
+      if (mode === 'quiz') {
+        quizModeDiv.classList.remove('hidden');
+        listModeDiv.classList.add('hidden');
+        btnQuiz.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow-md";
+        btnList.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900";
+      } else {
+        quizModeDiv.classList.add('hidden');
+        listModeDiv.classList.remove('hidden');
+        btnList.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 bg-indigo-600 text-white shadow-md";
+        btnQuiz.className = "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900";
+      }
+    }
+
+    // --- WEB SPEECH AUDIO SYNTHESIS ---
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playFullDialogue() {
+      const lines = [
+        "Emma, how long have you lived in this town?",
+        "I have lived here for seven years, since I was ten years old.",
+        "That's a long time! Have you been in the guitar club for a long time too?",
+        "Yes, I have played the guitar since last year. I have known Lisa since middle school."
+      ];
+      let index = 0;
+      function speakNext() {
+        if (index < lines.length) {
+          const utterance = new SpeechSynthesisUtterance(lines[index]);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.9;
+          utterance.onend = () => {
+            index++;
+            setTimeout(speakNext, 500);
+          };
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        speakNext();
+      }
+    }
+
+    function stopAudio() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    // --- PDF EXPORT FUNCTION ---
+    function saveAsPDF() {
+      window.print();
+    }
+
+    // --- SECTION 3 ACTIVITIES LOGIC ---
+
+    function renderAct1() {
+      const container = document.getElementById('act1-container');
+      if (!container) return;
+      container.innerHTML = act1Data.map((item, idx) => `
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span>Question ${idx + 1} of 10</span>
+            <button onclick="speakText('${item.answer}')" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-bold">
+              🔊 Listen
+            </button>
+          </div>
+          <p class="text-sm font-semibold text-slate-900">${item.prompt}</p>
+          <p class="text-xs text-indigo-700">${item.jp}</p>
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <input type="text" id="act1-input-${item.id}" oninput="checkAct1Completion(); saveInput();" placeholder="" class="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 w-48" />
+            <span id="act1-feedback-${item.id}" class="text-xs font-bold"></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function checkAct1Completion() {
+      let answeredCount = 0;
+      act1Data.forEach(item => {
+        const val = document.getElementById(`act1-input-${item.id}`)?.value.trim();
+        if (val) answeredCount++;
+      });
+      const statusText = document.getElementById('act1-status-text');
+      const btn = document.getElementById('btn-check-act1');
+      if (statusText) statusText.innerText = `Progress: ${answeredCount} / 10 questions answered`;
+      if (btn) {
+        if (answeredCount === 10) {
+          btn.disabled = false;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer border border-indigo-500";
+        } else {
+          btn.disabled = true;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+        }
+      }
+    }
+
+    function gradeAct1() {
+      let correct = 0;
+      act1Data.forEach(item => {
+        const userVal = document.getElementById(`act1-input-${item.id}`).value.trim().toLowerCase();
+        const fb = document.getElementById(`act1-feedback-${item.id}`);
+        const isCorrect = item.accepted.some(acc => acc.toLowerCase() === userVal);
+        if (isCorrect) {
+          correct++;
+          fb.innerHTML = `<span class="text-emerald-600 font-bold">✓ 正解！</span>`;
+        } else {
+          fb.innerHTML = `<span class="text-rose-600 font-bold">✗ 不正解 (正解: ${item.answer})</span>`;
+        }
+      });
+      document.getElementById('act1-status-text').innerText = `Result: ${correct} / 10 Correct!`;
+      updateGlobalScore();
+    }
+
+    // Act 2 Unscramble state
+    let act2State = {};
+
+    function renderAct2() {
+      const container = document.getElementById('act2-container');
+      if (!container) return;
+      container.innerHTML = act2Data.map((item, idx) => {
+        if (!act2State[item.id]) {
+          act2State[item.id] = {
+            pool: [...item.words].sort(() => Math.random() - 0.5),
+            selected: []
+          };
+        }
+        const state = act2State[item.id];
+        return `
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span>Question ${idx + 1} of 8</span>
+              <button onclick="resetAct2Item(${item.id})" class="text-slate-400 hover:text-slate-700 text-[11px] flex items-center gap-1 font-bold">
+                🔄 リセット
+              </button>
+            </div>
+            <p class="text-xs font-bold text-indigo-700">${item.jp}</p>
+            
+            <!-- Selected tiles box -->
+            <div id="act2-selected-${item.id}" class="min-h-[44px] p-2 bg-white rounded-xl border border-indigo-200 flex flex-wrap gap-2 items-center">
+              ${state.selected.length === 0 ? '<span class="text-xs text-slate-400 italic">下の単語カードをクリックして並べてください</span>' : ''}
+              ${state.selected.map((w, wIdx) => `
+                <button onclick="unselectAct2Word(${item.id}, ${wIdx})" class="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-bold shadow transition hover:bg-indigo-700">
+                  ${w}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Tile pool box -->
+            <div class="flex flex-wrap gap-2 pt-1">
+              ${state.pool.map((w, pIdx) => `
+                <button onclick="selectAct2Word(${item.id}, ${pIdx})" class="px-3 py-1 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-lg text-xs font-semibold shadow-sm transition">
+                  ${w}
+                </button>
+              `).join('')}
+            </div>
+            <div id="act2-feedback-${item.id}" class="text-xs font-bold pt-1"></div>
+          </div>
+        `;
+      }).join('');
+      checkAct2Completion();
+    }
+
+    function selectAct2Word(itemId, poolIdx) {
+      const state = act2State[itemId];
+      const word = state.pool.splice(poolIdx, 1)[0];
+      state.selected.push(word);
+      renderAct2();
+      saveInput();
+    }
+
+    function unselectAct2Word(itemId, selIdx) {
+      const state = act2State[itemId];
+      const word = state.selected.splice(selIdx, 1)[0];
+      state.pool.push(word);
+      renderAct2();
+      saveInput();
+    }
+
+    function resetAct2Item(itemId) {
+      const item = act2Data.find(i => i.id === itemId);
+      act2State[itemId] = {
+        pool: [...item.words].sort(() => Math.random() - 0.5),
+        selected: []
+      };
+      renderAct2();
+      saveInput();
+    }
+
+    function checkAct2Completion() {
+      let completedCount = 0;
+      act2Data.forEach(item => {
+        const state = act2State[item.id];
+        if (state && state.selected.length === item.words.length) {
+          completedCount++;
+        }
+      });
+      const statusText = document.getElementById('act2-status-text');
+      const btn = document.getElementById('btn-check-act2');
+      if (statusText) statusText.innerText = `Progress: ${completedCount} / 8 completed`;
+      if (btn) {
+        if (completedCount === 8) {
+          btn.disabled = false;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer border border-indigo-500";
+        } else {
+          btn.disabled = true;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+        }
+      }
+    }
+
+    function gradeAct2() {
+      let correct = 0;
+      act2Data.forEach(item => {
+        const state = act2State[item.id];
+        const userSentence = state.selected.join(' ').replace(/[.,?!]/g, '').toLowerCase().trim();
+        const targetSentence = item.answer.replace(/[.,?!]/g, '').toLowerCase().trim();
+        const fb = document.getElementById(`act2-feedback-${item.id}`);
+        if (userSentence === targetSentence) {
+          correct++;
+          fb.innerHTML = `<span class="text-emerald-600 font-bold">✓ 正解！ (${item.answer})</span>`;
+        } else {
+          fb.innerHTML = `<span class="text-rose-600 font-bold">✗ 不正解 (正解: ${item.answer})</span>`;
+        }
+      });
+      document.getElementById('act2-status-text').innerText = `Result: ${correct} / 8 Correct!`;
+      updateGlobalScore();
+    }
+
+    function renderAct3() {
+      const container = document.getElementById('act3-container');
+      if (!container) return;
+      container.innerHTML = act3Data.map((item, idx) => `
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span>Question ${idx + 1} of 7</span>
+            <button onclick="speakText('${item.prompt.replace('___', item.answer)}')" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-bold">
+              🔊 Listen
+            </button>
+          </div>
+          <p class="text-sm font-semibold text-slate-900">${item.prompt}</p>
+          <p class="text-xs text-indigo-700">${item.jp}</p>
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <input type="text" id="act3-input-${item.id}" oninput="checkAct3Completion(); saveInput();" placeholder="" class="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 w-48" />
+            <span id="act3-feedback-${item.id}" class="text-xs font-bold"></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function checkAct3Completion() {
+      let answeredCount = 0;
+      act3Data.forEach(item => {
+        const val = document.getElementById(`act3-input-${item.id}`)?.value.trim();
+        if (val) answeredCount++;
+      });
+      const statusText = document.getElementById('act3-status-text');
+      const btn = document.getElementById('btn-check-act3');
+      if (statusText) statusText.innerText = `Progress: ${answeredCount} / 7 questions answered`;
+      if (btn) {
+        if (answeredCount === 7) {
+          btn.disabled = false;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer border border-indigo-500";
+        } else {
+          btn.disabled = true;
+          btn.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+        }
+      }
+    }
+
+    function gradeAct3() {
+      let correct = 0;
+      act3Data.forEach(item => {
+        const userVal = document.getElementById(`act3-input-${item.id}`).value.trim().toLowerCase();
+        const fb = document.getElementById(`act3-feedback-${item.id}`);
+        if (userVal === item.answer.toLowerCase()) {
+          correct++;
+          fb.innerHTML = `<span class="text-emerald-600 font-bold">✓ 正解！</span>`;
+        } else {
+          fb.innerHTML = `<span class="text-rose-600 font-bold">✗ 不正解 (正解: ${item.answer})</span>`;
+        }
+      });
+      document.getElementById('act3-status-text').innerText = `Result: ${correct} / 7 Correct!`;
+      updateGlobalScore();
+    }
+
+    function resetSection3() {
+      act1Data.forEach(item => {
+        const el = document.getElementById(`act1-input-${item.id}`);
+        if (el) el.value = '';
+        const fb = document.getElementById(`act1-feedback-${item.id}`);
+        if (fb) fb.innerHTML = '';
+      });
+      document.getElementById('act1-status-text').innerText = 'Progress: 0 / 10 questions answered';
+      const b1 = document.getElementById('btn-check-act1');
+      if (b1) {
+        b1.disabled = true;
+        b1.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+      }
+
+      act2Data.forEach(item => {
+        resetAct2Item(item.id);
+        const fb = document.getElementById(`act2-feedback-${item.id}`);
+        if (fb) fb.innerHTML = '';
+      });
+
+      act3Data.forEach(item => {
+        const el = document.getElementById(`act3-input-${item.id}`);
+        if (el) el.value = '';
+        const fb = document.getElementById(`act3-feedback-${item.id}`);
+        if (fb) fb.innerHTML = '';
+      });
+      document.getElementById('act3-status-text').innerText = 'Progress: 0 / 7 questions answered';
+      const b3 = document.getElementById('btn-check-act3');
+      if (b3) {
+        b3.disabled = true;
+        b3.className = "px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+      }
+
+      localStorage.removeItem('unit15_grammar_data');
+      updateGlobalScore();
+    }
+
+    // --- SECTION 4: SPEED TEST & WORKSHEET LIST ---
+
+    function startChallengeTest() {
+      currentChallengeIndex = 0;
+      challengeResults = [];
+      document.getElementById('challenge-start-card').classList.add('hidden');
+      document.getElementById('challenge-result-card').classList.add('hidden');
+      document.getElementById('challenge-quiz-card').classList.remove('hidden');
+      loadChallengeQuestion();
+    }
+
+    function loadChallengeQuestion() {
+      if (currentChallengeIndex >= all25Problems.length) {
+        finishChallengeTest();
+        return;
+      }
+      const item = all25Problems[currentChallengeIndex];
+      document.getElementById('quiz-question-number').innerText = `Question ${currentChallengeIndex + 1} of 25`;
+      document.getElementById('quiz-category-tag').innerText = item.cat;
+      document.getElementById('quiz-english-prompt').innerText = item.prompt;
+      document.getElementById('quiz-japanese-prompt').innerText = item.jp;
+
+      const inputContainer = document.getElementById('quiz-input-container');
+      inputContainer.innerHTML = `
+        <input type="text" id="challenge-user-input" placeholder="" class="w-full px-4 py-3 bg-slate-100 border border-slate-300 rounded-2xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-500 shadow-inner" autofocus />
+        <p class="text-[11px] text-slate-400 mt-1 font-medium">Hint: ${item.hint}</p>
+      `;
+
+      // Start Countdown Timer
+      challengeTimeRemaining = 30;
+      document.getElementById('quiz-timer-text').innerHTML = `⏱️ ${challengeTimeRemaining}s`;
+      document.getElementById('quiz-timer-bar').style.width = '100%';
+
+      clearInterval(challengeTimer);
+      challengeTimer = setInterval(() => {
+        challengeTimeRemaining--;
+        document.getElementById('quiz-timer-text').innerHTML = `⏱️ ${challengeTimeRemaining}s`;
+        const pct = (challengeTimeRemaining / 30) * 100;
+        document.getElementById('quiz-timer-bar').style.width = `${pct}%`;
+        if (challengeTimeRemaining <= 0) {
+          clearInterval(challengeTimer);
+          submitChallengeAnswer(true);
+        }
+      }, 1000);
+    }
+
+    function speakCurrentChallengeSentence() {
+      const item = all25Problems[currentChallengeIndex];
+      speakText(item.answer);
+    }
+
+    function skipQuestion() {
+      clearInterval(challengeTimer);
+      challengeResults.push({
+        id: all25Problems[currentChallengeIndex].id,
+        prompt: all25Problems[currentChallengeIndex].prompt,
+        userAnswer: "(Skipped)",
+        correctAnswer: all25Problems[currentChallengeIndex].answer,
+        isCorrect: false
+      });
+      currentChallengeIndex++;
+      loadChallengeQuestion();
+    }
+
+    function submitChallengeAnswer(isTimeout = false) {
+      clearInterval(challengeTimer);
+      const inputEl = document.getElementById('challenge-user-input');
+      const userVal = inputEl ? inputEl.value.trim() : '';
+      const item = all25Problems[currentChallengeIndex];
+
+      const isCorrect = item.accepted.some(acc => acc.toLowerCase() === userVal.toLowerCase());
+      challengeResults.push({
+        id: item.id,
+        prompt: item.prompt,
+        userAnswer: userVal || "(No answer)",
+        correctAnswer: item.answer,
+        isCorrect: isCorrect
+      });
+
+      currentChallengeIndex++;
+      loadChallengeQuestion();
+    }
+
+    function finishChallengeTest() {
+      document.getElementById('challenge-quiz-card').classList.add('hidden');
+      document.getElementById('challenge-result-card').classList.remove('hidden');
+
+      const correctCount = challengeResults.filter(r => r.isCorrect).length;
+      const points = correctCount * 2;
+      const accuracy = Math.round((correctCount / 25) * 100);
+
+      document.getElementById('res-score-points').innerText = points;
+      document.getElementById('res-correct-count').innerText = `${correctCount} / 25`;
+      document.getElementById('res-accuracy-pct').innerText = `${accuracy}%`;
+
+      const reviewList = document.getElementById('res-review-list');
+      reviewList.innerHTML = challengeResults.map((r, idx) => `
+        <div class="p-3 rounded-xl border ${r.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'} flex items-start justify-between gap-2 text-xs">
+          <div>
+            <p class="font-bold text-slate-900">Q${idx + 1}: ${r.prompt}</p>
+            <p class="text-slate-600 mt-0.5">Your answer: <span class="font-semibold ${r.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${r.userAnswer}</span></p>
+            ${!r.isCorrect ? `<p class="text-slate-500">Correct answer: <span class="font-bold text-slate-800">${r.correctAnswer}</span></p>` : ''}
+          </div>
+          <div>
+            ${r.isCorrect ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-md">Correct</span>' : '<span class="px-2 py-1 bg-rose-100 text-rose-800 font-bold rounded-md">Incorrect</span>'}
+          </div>
+        </div>
+      `).join('');
+      updateGlobalScore();
+    }
+
+    // Mode 2: All 25 Problems Worksheet List Render
+    function renderSection4List() {
+      const container = document.getElementById('all-25-list-container');
+      if (!container) return;
+      container.innerHTML = all25Problems.map((item, idx) => `
+        <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-md">Q${idx + 1} • ${item.cat}</span>
+            <button onclick="speakText('${item.answer}')" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-bold">
+              🔊 Pronunciation
+            </button>
+          </div>
+          <p class="text-sm font-semibold text-slate-900">${item.prompt}</p>
+          <p class="text-xs text-indigo-700">${item.jp}</p>
+          
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <input type="text" id="sec4-input-${item.id}" oninput="checkSec4Completion(); saveInput();" placeholder="" class="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 w-64" />
+            <span id="sec4-feedback-${item.id}" class="text-xs font-bold"></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function checkSec4Completion() {
+      let answeredCount = 0;
+      all25Problems.forEach(item => {
+        const val = document.getElementById(`sec4-input-${item.id}`)?.value.trim();
+        if (val) answeredCount++;
+      });
+      
+      const statusText1 = document.getElementById('sec4-progress-status');
+      const statusText2 = document.getElementById('sec4-bottom-status');
+      const btnTop = document.getElementById('btn-check-sec4');
+      const btnBottom = document.getElementById('btn-check-sec4-bottom');
+
+      const statusStr = `Progress: ${answeredCount} / 25 answered`;
+      if (statusText1) statusText1.innerText = statusStr;
+      if (statusText2) statusText2.innerText = statusStr;
+
+      const isComplete = (answeredCount === 25);
+      [btnTop, btnBottom].forEach(btn => {
+        if (!btn) return;
+        if (isComplete) {
+          btn.disabled = false;
+          btn.className = "px-6 py-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer border border-indigo-500";
+        } else {
+          btn.disabled = true;
+          btn.className = "px-6 py-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+        }
+      });
+    }
+
+    function checkAllListModeAnswers() {
+      let correct = 0;
+      all25Problems.forEach(item => {
+        const userVal = document.getElementById(`sec4-input-${item.id}`).value.trim();
+        const fb = document.getElementById(`sec4-feedback-${item.id}`);
+        const isCorrect = item.accepted.some(acc => acc.toLowerCase() === userVal.toLowerCase());
+        if (isCorrect) {
+          correct++;
+          fb.innerHTML = `<span class="text-emerald-600 font-bold">✓ 正解！</span>`;
+        } else {
+          fb.innerHTML = `<span class="text-rose-600 font-bold">✗ 不正解 (正解: ${item.answer})</span>`;
+        }
+      });
+      const statusStr = `Graded Result: ${correct} / 25 Correct (${Math.round((correct/25)*100)}%)`;
+      if (document.getElementById('sec4-progress-status')) document.getElementById('sec4-progress-status').innerText = statusStr;
+      if (document.getElementById('sec4-bottom-status')) document.getElementById('sec4-bottom-status').innerText = statusStr;
+      updateGlobalScore();
+    }
+
+    function resetSection4() {
+      all25Problems.forEach(item => {
+        const el = document.getElementById(`sec4-input-${item.id}`);
+        if (el) el.value = '';
+        const fb = document.getElementById(`sec4-feedback-${item.id}`);
+        if (fb) fb.innerHTML = '';
+      });
+      document.getElementById('sec4-progress-status').innerText = 'Progress: 0 / 25 answered';
+      if (document.getElementById('sec4-bottom-status')) document.getElementById('sec4-bottom-status').innerText = 'Progress: 0 / 25 answered';
+      
+      const b1 = document.getElementById('btn-check-sec4');
+      const b2 = document.getElementById('btn-check-sec4-bottom');
+      [b1, b2].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.className = "px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300";
+      });
+
+      localStorage.removeItem('unit15_grammar_data');
+      updateGlobalScore();
+    }
+
+    function resetAllProgress() {
+      resetSection3();
+      resetSection4();
+      localStorage.clear();
+      updateGlobalScore();
+    }
+
+    // --- GLOBAL SCORE & MASTERY METRICS ---
+
+    function updateGlobalScore() {
+      let totalItems = 10 + 8 + 7 + 25; // 50 items total across all modules
+      let correctCount = 0;
+
+      // Count Act 1 correct
+      act1Data.forEach(item => {
+        const val = document.getElementById(`act1-input-${item.id}`)?.value.trim().toLowerCase() || '';
+        if (item.accepted.some(acc => acc.toLowerCase() === val)) correctCount++;
+      });
+
+      // Count Act 3 correct
+      act3Data.forEach(item => {
+        const val = document.getElementById(`act3-input-${item.id}`)?.value.trim().toLowerCase() || '';
+        if (val === item.answer.toLowerCase()) correctCount++;
+      });
+
+      // Count Section 4 list mode correct
+      all25Problems.forEach(item => {
+        const val = document.getElementById(`sec4-input-${item.id}`)?.value.trim() || '';
+        if (item.accepted.some(acc => acc.toLowerCase() === val.toLowerCase())) correctCount++;
+      });
+
+      // Update header widgets
+      const totalScoreEl = document.getElementById('total-score');
+      const masteryPctEl = document.getElementById('mastery-percentage');
+      const pct = Math.round((correctCount / totalItems) * 100);
+
+      if (totalScoreEl) totalScoreEl.innerText = `${correctCount} / ${totalItems}`;
+      if (masteryPctEl) masteryPctEl.innerText = `${pct}%`;
+
+      // Update Summary Tab Metrics
+      const sumTotal = document.getElementById('summary-total');
+      const sumCorrect = document.getElementById('summary-correct');
+      const sumIncorrect = document.getElementById('summary-incorrect');
+      const sumAccuracy = document.getElementById('summary-accuracy');
+
+      if (sumTotal) sumTotal.innerText = totalItems;
+      if (sumCorrect) sumCorrect.innerText = correctCount;
+      if (sumIncorrect) sumIncorrect.innerText = Math.max(0, totalItems - correctCount);
+      if (sumAccuracy) sumAccuracy.innerText = `${pct}%`;
+    }
+  </script>
+</body>
+</html>
